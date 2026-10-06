@@ -47,7 +47,12 @@ MODEL="Qwen/Qwen2.5-14B-Instruct"
 MODEL_REV="cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
 VLLM_PINNED="0.31.0"
 GPU_EXPECT="L40S"
-MAX_MODEL_LEN=131072
+# Model's derived max (config.json max_position_embeddings). vLLM 0.31.0 refuses
+# anything larger without VLLM_ALLOW_LONG_MAX_MODEL_LEN=1, which risks NaN on
+# RoPE positions >32768 — never set it. Trace evidence (2026-10-06, all 7 plan
+# files): max context_tokens = 7999, so 32768 loses zero requests. Matches
+# Pilot 001's engine config (default 32768).
+MAX_MODEL_LEN=32768
 MAX_TOKENS_CAP=1024
 SLO_TTFT_S=5.0
 SLO_TPOT_MS=100.0
