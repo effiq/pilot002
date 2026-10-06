@@ -79,3 +79,21 @@ Every figure published from this pilot is reproducible from artifacts: the publi
 *Frozen 2026-10-06. Signed by the operator. This document ships before any result does.*
 
 *Revision history: v2.0 final incorporates a pre-freeze review (2026-10-06, before any measurement) that corrected three defects in the draft — the quality-gate tolerance clause (restored the overall-delta condition alongside per-axis), the offered-load calibration rule (direction corrected to heaviest SLO-compliant configuration, with thinning grid, SLO-compliance definition, and fallback), and the slice-accounting inconsistency (6 runs now consume 6 merged conv+code slice pairs) — plus three tightenings (per-request throughput definition, identical server flags across arms, trace-mirror substitution rule). A second protocol↔script reconciliation pass will run before the first measurement, per the standing procedure established in effiq/pilot001 DEVIATIONS.md.*
+
+---
+
+## Amendment Log
+
+All amendments are: (a) made **before any formal measurement data was collected**; (b) justified by archived, hash-pinned evidence in `effiq/pilot-logs`; (c) signed by the project owner. The frozen sections above remain unchanged except as stated below.
+
+### Amendment-01 · Offered-load thinning grid extension (2026-10-06)
+
+**Change (L2):** the thinning retention grid **r ∈ {1, 1/2, 1/4, 1/8}** becomes **r ∈ {1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128, 1/256}**. The selection rule is unchanged in kind: the heaviest configuration (largest r × C; ties toward larger C) at which Arm A attains ≥ 95% SLO compliance on the calibration slice pair; if no grid point passes, the lightest configuration (now r = 1/256, C = 4) is used and the shortfall is disclosed in the verdict. One operational clarification, pre-registered here: calibration scans configurations in strictly decreasing offered-load order and stops at the first pass — outcome-identical to a full grid scan under the documented assumption that SLO compliance is monotone non-increasing in offered load; every attempted configuration is recorded in the calibration log (watermarked CALIBRATION DATA ONLY).
+
+**Justification (evidence: Stage-01 anchors, `effiq/pilot-logs` 2026-10-06/01-trace-pipeline/run_1, pushed at commit `4b23514`):** the selected formal slice pairs carry 108k–461k merged requests/hour; the raw traces average 282M (conv) + 253M (code) tokens/hour. A single L40S serving Qwen2.5-14B sustains on the order of 10M tokens/hour (Pilot 001 Stage-01 calibration measured 408–1176 tok/s total per request at batch 1; continuous batching lifts aggregate throughput by roughly an order of magnitude, not two). The raw arrival process is therefore ≈ 50× single-card capacity, and the lightest originally-frozen configuration (r = 1/8, C = 4 → 0.5× raw) is ≈ 25× over: the entire frozen grid would have measured collapse, not serving, and the fallback clause would have locked the pilot into that degenerate regime. The extension preserves the rule's intent — the heaviest honestly-servable load — while making the grid reachable. At r = 1/256 each formal run still carries ≈ 400–1,800 requests per arm block, ample for the paired statistics.
+
+**Timing:** signed 2026-10-06, before any measurement data. Stage 01 is CPU-only trace processing; no GPU measurement has occurred in this window.
+
+§2 exploration space item 1 is henceforth read with the extended grid.
+
+*Signed by the operator, 2026-10-06.*
