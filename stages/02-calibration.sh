@@ -205,8 +205,21 @@ if [ "${STAGE02_SKIP_PREFLIGHT:-0}" != "1" ]; then   # test hook; production nev
     || die "GPU is not $GPU_EXPECT — hardware boundary is locked (L3)"
   python3 -c "import vllm, sys; v=vllm.__version__; sys.exit(0 if v=='$VLLM_PINNED' else 1)" \
     || die "vLLM is not $VLLM_PINNED — engine version is pinned (L1)"
+  # disk headroom: 45GB only when the ≈28GB weights still need downloading;
+  # with the snapshot cached, calibration archives are MB-scale → 10GB is ample.
+  # (RunPod template caches HF under /workspace, a different mount than $HOME.)
+  SNAP=""
+  for base in "${HF_HOME:-$HOME/.cache/huggingface}" /workspace/.cache/huggingface; do
+    d="$base/hub/models--Qwen--Qwen2.5-14B-Instruct"
+    [ -d "$d" ] && SNAP="$d" && break
+  done
   FREE_GB=$(df --output=avail -BG "$HOME" | tail -1 | tr -dc '0-9')
-  [ "${FREE_GB:-0}" -ge 45 ] || die "disk headroom < 45GB (weights ≈ 28GB)"
+  if [ -n "$SNAP" ]; then
+    [ "${FREE_GB:-0}" -ge 10 ] || die "disk headroom < 10GB (weights already cached)"
+    say "weights snapshot cached at $SNAP — disk assert relaxed to 10GB"
+  else
+    [ "${FREE_GB:-0}" -ge 45 ] || die "disk headroom < 45GB (weights ≈ 28GB)"
+  fi
 fi
 python3 -c "import httpx" 2>/dev/null || die "httpx not importable (expected present with vLLM)"
 [ -f "$CALIB_PLAN" ] || die "calibration plan missing: $CALIB_PLAN — re-run stage 01 first"
