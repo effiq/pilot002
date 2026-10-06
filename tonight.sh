@@ -54,7 +54,7 @@ mkdir -p "$OUT_DIR"
 say "stage: ${STAGE} → logs: ${DATE_STR}/${STAGE}/"
 
 set +e
-bash "$STAGE_SCRIPT" 2>&1 | tee "$OUT_DIR/stage.log"
+bash "$STAGE_SCRIPT" "$@" 2>&1 | tee "$OUT_DIR/stage.log"
 RC=${PIPESTATUS[0]}
 set -e
 echo "$RC" > "$OUT_DIR/exit-code.txt"
