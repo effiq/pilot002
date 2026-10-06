@@ -60,6 +60,11 @@ SLO_COMPLIANCE=0.95
 D_GRID="${D_GRID:-1 2 4 8 16 32 64 128 256}"   # r = 1/D; env override is a test hook only
 C_GRID="${C_GRID:-4 8 16}"                     # env override is a test hook only
 REQ_TIMEOUT_S=900
+# Max requests in flight at once (client-internal throttle; §2 exploration
+# space). Payloads are built only after the gate, so memory is O(CONC), not
+# O(plan rows). Learned the hard way 2026-10-06: unbounded tasks at r=1,C=16
+# (203k pending × up-to-8k-token payloads) wedged the event loop.
+CLIENT_CONC="${CLIENT_CONC:-2048}"               # env override is a test hook only
 MAX_SECONDS=19800                   # soft rail (~5.5 h), resumable
 FILLER_SEED=20261010                # same stream as stage-01 keep_u
 PORT="${PORT:-8000}"                # env override is a test hook only
@@ -249,6 +254,7 @@ SLO_TTFT_S="$SLO_TTFT_S" SLO_TPOT_MS="$SLO_TPOT_MS" SLO_COMPLIANCE="$SLO_COMPLIA
 D_GRID="$D_GRID" C_GRID="$C_GRID" REQ_TIMEOUT_S="$REQ_TIMEOUT_S" \
 MAX_TOKENS_CAP="$MAX_TOKENS_CAP" MAX_MODEL_LEN="$MAX_MODEL_LEN" \
 FILLER_SEED="$FILLER_SEED" T0="$T0" MAX_SECONDS="$MAX_SECONDS" \
+CLIENT_CONC="$CLIENT_CONC" \
 python3 - <<'PY'
 import asyncio, hashlib, json, os, random, sys, time, urllib.request
 import httpx
@@ -262,6 +268,7 @@ NEED      = float(os.environ["SLO_COMPLIANCE"])
 Ds        = [int(x) for x in os.environ["D_GRID"].split()]
 Cs        = [int(x) for x in os.environ["C_GRID"].split()]
 REQ_TO    = float(os.environ["REQ_TIMEOUT_S"])
+CONC      = int(os.environ["CLIENT_CONC"])
 CAP       = int(os.environ["MAX_TOKENS_CAP"])
 MML       = int(os.environ["MAX_MODEL_LEN"])
 FSEED     = int(os.environ["FILLER_SEED"])
@@ -298,7 +305,8 @@ def metrics_waiting_running():
 
 async def replay(d, c, raw_f):
     """Replay the calibration plan at r=1/d, C=c.
-    Returns (status, sent, noncomp, skipped, n_sched)."""
+    Returns (status, sent, noncomp, skipped, n_sched).
+    sent = requests that passed the concurrency gate (engaged the server)."""
     r = 1.0 / d
     sched = [(row["arrival_offset_s"] / c, row) for row in rows if row["keep_u"] < r]
     n_sched = len(sched)
@@ -307,9 +315,12 @@ async def replay(d, c, raw_f):
     sent = done = noncomp = skipped = 0
     abort = asyncio.Event()
     t0 = time.monotonic()
+    # in-flight gate: bounds live payloads to O(CONC) memory; tasks waiting at
+    # the gate hold only a reference to the plan row (already in memory)
+    sem = asyncio.Semaphore(CONC)
 
     async def fire(row):
-        nonlocal done, noncomp, skipped
+        nonlocal sent, done, noncomp, skipped
         rid = row["request_id"]
         ctx, gen = row["context_tokens"], row["generated_tokens"]
         rec = {"request_id": rid, "D": d, "C": c}
@@ -321,69 +332,75 @@ async def replay(d, c, raw_f):
             done += 1
             skipped += 1
             return
-        payload = {"model": os.environ["MODEL"], "prompt": filler_ids(ctx, rid),
-                   "max_tokens": mt, "ignore_eos": True, "temperature": 0,
-                   "stream": True, "stream_options": {"include_usage": True}}
-        t_send = time.monotonic()
-        t_first = t_last = None
-        comp_tokens = 0
-        status = "ok"
-        try:
-            async with client.stream("POST", URL, json=payload) as resp:
-                if resp.status_code != 200:
-                    status = f"http_{resp.status_code}"
-                else:
-                    async for line in resp.aiter_lines():
-                        if not line.startswith("data:"):
-                            continue
-                        data = line[5:].strip()
-                        if data == "[DONE]":
-                            break
-                        now = time.monotonic()
-                        try:
-                            obj = json.loads(data)
-                        except Exception:
-                            continue
-                        if t_first is None:
-                            t_first = now
-                        t_last = now
-                        u = obj.get("usage")
-                        if u:
-                            comp_tokens = u.get("completion_tokens", comp_tokens)
-        except asyncio.CancelledError:
-            # config aborted mid-flight: cancelled requests count as non-compliant
-            # (the abort rule fires only when >5% have already measurably failed)
-            rec.update(status="cancelled", ttft_s=None, tpot_ms=None,
-                       e2e_s=round(time.monotonic() - t_send, 4),
-                       completion_tokens=comp_tokens, slo_ok=False,
+        # gate wait is client-side queueing; it is disclosed per request as
+        # send_lag_ms and counts toward TTFT (t_send starts only after the
+        # gate) — conservative direction. A task cancelled while waiting at
+        # the gate never engaged the server: no row, no sent increment.
+        async with sem:
+            sent += 1
+            payload = {"model": os.environ["MODEL"], "prompt": filler_ids(ctx, rid),
+                       "max_tokens": mt, "ignore_eos": True, "temperature": 0,
+                       "stream": True, "stream_options": {"include_usage": True}}
+            t_send = time.monotonic()
+            t_first = t_last = None
+            comp_tokens = 0
+            status = "ok"
+            try:
+                async with client.stream("POST", URL, json=payload) as resp:
+                    if resp.status_code != 200:
+                        status = f"http_{resp.status_code}"
+                    else:
+                        async for line in resp.aiter_lines():
+                            if not line.startswith("data:"):
+                                continue
+                            data = line[5:].strip()
+                            if data == "[DONE]":
+                                break
+                            now = time.monotonic()
+                            try:
+                                obj = json.loads(data)
+                            except Exception:
+                                continue
+                            if t_first is None:
+                                t_first = now
+                            t_last = now
+                            u = obj.get("usage")
+                            if u:
+                                comp_tokens = u.get("completion_tokens", comp_tokens)
+            except asyncio.CancelledError:
+                # config aborted mid-flight: cancelled requests count as non-compliant
+                # (the abort rule fires only when >5% have already measurably failed)
+                rec.update(status="cancelled", ttft_s=None, tpot_ms=None,
+                           e2e_s=round(time.monotonic() - t_send, 4),
+                           completion_tokens=comp_tokens, slo_ok=False,
+                           send_lag_ms=round((t_send - t0) * 1000.0, 1))
+                raw_f.write(json.dumps(rec) + "\n"); raw_f.flush()
+                done += 1
+                noncomp += 1
+                raise
+            except Exception as e:
+                status = "error:" + type(e).__name__
+            t_end = time.monotonic()
+            if comp_tokens == 0 and status == "ok":
+                status = "error:no_tokens"
+            ttft = (t_first - t_send) if t_first is not None else None
+            if t_first is not None and comp_tokens > 1:
+                tpot_ms = (t_last - t_first) / (comp_tokens - 1) * 1000.0
+            elif t_first is not None:
+                tpot_ms = (t_end - t_first) * 1000.0   # single-token output: decode time
+            else:
+                tpot_ms = None
+            ok = (status == "ok" and ttft is not None and ttft <= TTFT_SLO
+                  and tpot_ms is not None and tpot_ms <= TPOT_SLO)
+            rec.update(status=status, ttft_s=round(ttft, 4) if ttft is not None else None,
+                       tpot_ms=round(tpot_ms, 3) if tpot_ms is not None else None,
+                       e2e_s=round(t_end - t_send, 4),
+                       completion_tokens=comp_tokens, slo_ok=ok,
                        send_lag_ms=round((t_send - t0) * 1000.0, 1))
             raw_f.write(json.dumps(rec) + "\n"); raw_f.flush()
             done += 1
-            noncomp += 1
-            raise
-        except Exception as e:
-            status = "error:" + type(e).__name__
-        t_end = time.monotonic()
-        if comp_tokens == 0 and status == "ok":
-            status = "error:no_tokens"
-        ttft = (t_first - t_send) if t_first is not None else None
-        if t_first is not None and comp_tokens > 1:
-            tpot_ms = (t_last - t_first) / (comp_tokens - 1) * 1000.0
-        elif t_first is not None:
-            tpot_ms = (t_end - t_first) * 1000.0   # single-token output: decode time
-        else:
-            tpot_ms = None
-        ok = (status == "ok" and ttft is not None and ttft <= TTFT_SLO
-              and tpot_ms is not None and tpot_ms <= TPOT_SLO)
-        rec.update(status=status, ttft_s=round(ttft, 4) if ttft is not None else None,
-                   tpot_ms=round(tpot_ms, 3) if tpot_ms is not None else None,
-                   e2e_s=round(t_end - t_send, 4),
-                   completion_tokens=comp_tokens, slo_ok=ok,
-                   send_lag_ms=round((t_send - t0) * 1000.0, 1))
-        raw_f.write(json.dumps(rec) + "\n"); raw_f.flush()
-        done += 1
-        if not ok:
-            noncomp += 1
+            if not ok:
+                noncomp += 1
 
     async def watchdog():
         while not abort.is_set():
@@ -392,7 +409,6 @@ async def replay(d, c, raw_f):
                 abort.set()
 
     async def sender():
-        nonlocal sent
         for at, row in sched:
             if abort.is_set():
                 break
@@ -400,7 +416,6 @@ async def replay(d, c, raw_f):
             if delay > 0:
                 await asyncio.sleep(delay)
             asyncio.create_task(fire(row))
-            sent += 1
 
     async def progress():
         while not abort.is_set() and done < n_sched:
@@ -435,7 +450,8 @@ async def drain():
 
 async def main():
     global client
-    limits = httpx.Limits(max_connections=None, max_keepalive_connections=256)
+    limits = httpx.Limits(max_connections=CONC,
+                          max_keepalive_connections=min(CONC, 256))
     timeout = httpx.Timeout(REQ_TO, connect=30.0)
     async with httpx.AsyncClient(limits=limits, timeout=timeout) as client:
         order = sorted([(d, c) for d in Ds for c in Cs], key=lambda x: (-(x[1] / x[0]), -x[1]))
