@@ -74,14 +74,21 @@ check_time_rail() {
 }
 
 # ---------------- run dir: resume-or-create (Pilot 001 pattern) --------
+# --rebuild: pod disk was wiped — the COMPLETE receipt survives in the logs
+# repo but the pod-local trace artifacts are gone. Ignore the guard, run the
+# full pipeline into a NEW run dir; anchors must reproduce the originals.
+REBUILD=0
+[ "${1:-}" = "--rebuild" ] && REBUILD=1
 LATEST="$(ls -dt "$LOGS_DIR"/*/"$STAGE_NAME"/run_* 2>/dev/null | head -1 || true)"
-if [ "${1:-}" != "--verify" ] && [ -n "$LATEST" ] && [ -f "$LATEST/COMPLETE" ]; then
+if [ "$REBUILD" != "1" ] && [ "${1:-}" != "--verify" ] && [ -n "$LATEST" ] && [ -f "$LATEST/COMPLETE" ]; then
   say "this stage is already COMPLETE — nothing to do."
   echo "  anchors: $LATEST"
   echo "  slices:  $LATEST/slices.json"
   echo "  next:    switch the STAGE file to 02-calibration"
+  echo "  (pod wiped and trace artifacts lost? re-run with: --rebuild)"
   exit 0
 fi
+[ "$REBUILD" = "1" ] && say "--rebuild: ignoring COMPLETE guard; rebuilding pod-local artifacts into a new run dir"
 
 mkdir -p "$TRACE_DIR" "$PLANS_DIR"
 
@@ -253,7 +260,7 @@ fi
 # ============================================================
 # default mode: run the pipeline
 # ============================================================
-if [ -n "$LATEST" ]; then
+if [ -n "$LATEST" ] && [ "$REBUILD" != "1" ]; then
   RUN_DIR="$LATEST"
   say "resuming incomplete run dir: $RUN_DIR"
 else
