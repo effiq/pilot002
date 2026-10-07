@@ -14,9 +14,20 @@
 #   - SLO (frozen L4): a request is compliant iff TTFT ≤ 5 s AND
 #     TPOT ≤ 100 ms. Compliance = compliant / sent. Requests that
 #     time out or error count as non-compliant.
-#   - Early abort (declared here, calibration-only): a config is
-#     abandoned as FAIL as soon as non-compliant count exceeds 5% of
-#     sent-schedule size — further waiting cannot change the verdict.
+#   - Early abort (declared here, calibration-only), two tiers:
+#     tier 1: a config is abandoned as FAIL as soon as non-compliant
+#     count exceeds 5% of the sent-schedule size — further waiting
+#     cannot change the verdict.
+#     tier 2: once the full offer window (3600/C) has elapsed, if >5%
+#     of engaged requests have failed (>= 200 engaged), the config is
+#     abandoned as FAIL. Under Amendment-01's monotone-compliance
+#     assumption it cannot recover to 95%; tier-2 only makes a hopeless
+#     config fail FASTER and can never change which config passes.
+#     Both tiers are replay-client implementation details that do not
+#     affect offered load — inside the exploration space of Protocol
+#     Lock v2.1 §2 item 2; no protocol amendment required. The firing
+#     tier is recorded in each config marker as abort_reason and
+#     re-checked by --verify.
 #   - ALL outputs are watermarked: CALIBRATION DATA ONLY — never
 #     enters the CI.
 #
@@ -108,20 +119,26 @@ if [ "${1:-}" = "--verify" ]; then
   VD="$VD" SLO_TTFT_S="$SLO_TTFT_S" SLO_TPOT_MS="$SLO_TPOT_MS" \
   SLO_COMPLIANCE="$SLO_COMPLIANCE" D_GRID="$D_GRID" C_GRID="$C_GRID" \
   python3 - <<'PY'
-import glob, json, os, sys
+import glob, json, os, re, sys
 
 VD  = os.environ["VD"]
 TTFT, TPOT = float(os.environ["SLO_TTFT_S"]), float(os.environ["SLO_TPOT_MS"])
 NEED = float(os.environ["SLO_COMPLIANCE"])
-Ds  = [int(x) for x in os.environ["D_GRID"].split()]
-Cs  = [int(x) for x in os.environ["C_GRID"].split()]
 
 def compliant(row):
     return (row["status"] == "ok" and row["ttft_s"] is not None
             and row["ttft_s"] <= TTFT and row["tpot_ms"] is not None
             and row["tpot_ms"] <= TPOT)
 
-order = sorted([(d, c) for d in Ds for c in Cs], key=lambda x: (-(x[1] / x[0]), -x[1]))
+# derive attempted configs from the archive itself (not from the caller's
+# grid env): verify must recompute from raw artifacts and never crash on a
+# grid mismatch — it reports instead.
+pairs = []
+for fn in os.listdir(VD):
+    m = re.fullmatch(r"calib_d(\d+)_c(\d+)\.done", fn)
+    if m:
+        pairs.append((int(m.group(1)), int(m.group(2))))
+order = sorted(pairs, key=lambda x: (-(x[1] / x[0]), -x[1]))
 checks = []
 def check(name, ok, detail=""):
     checks.append((name, bool(ok), detail))
@@ -148,9 +165,16 @@ for d, c in order:
         check(f"config d{d}/c{c}: status consistent", marker["status"] == "PASS",
               marker["status"])
     if marker["status"] == "ABORTED-FAIL":
-        sched_n = marker.get("scheduled", len(rows))
-        check(f"config d{d}/c{c}: abort rule (>5% of scheduled) holds",
-              noncomp > 0.05 * sched_n, f"{noncomp}/{sched_n}")
+        reason = marker.get("abort_reason", "tier1: noncompliant > 5% of scheduled")
+        if reason.startswith("tier2"):
+            check(f"config d{d}/c{c}: tier-2 abort (window elapsed, >5% of "
+                  f"engaged failed, >=200 engaged) holds",
+                  len(sent) >= 200 and noncomp > 0.05 * len(sent),
+                  f"{noncomp}/{len(sent)}")
+        else:
+            sched_n = marker.get("scheduled", len(rows))
+            check(f"config d{d}/c{c}: tier-1 abort (>5% of scheduled) holds",
+                  noncomp > 0.05 * sched_n, f"{noncomp}/{sched_n}")
         check(f"config d{d}/c{c}: all fired requests accounted in raw "
               f"(completed + cancelled + skipped = sent)",
               len(rows) == marker["sent"] + marker.get("skipped_overlength", 0),
@@ -166,7 +190,7 @@ attempted = [k for k in order if k in summaries]
 first_pass = next((k for k in attempted if summaries[k][1] == "PASS"), None)
 check("an attempted config exists", len(attempted) > 0)
 check("scan stopped at first PASS (or grid exhausted)",
-      attempted[-1] == first_pass or first_pass is None)
+      (attempted and attempted[-1] == first_pass) or first_pass is None)
 if first_pass:
     check("chosen.json equals first PASS config",
           chosen["D"] == first_pass[0] and chosen["C"] == first_pass[1],
@@ -318,7 +342,7 @@ def metrics_waiting_running():
 
 async def replay(d, c, raw_f):
     """Replay the calibration plan at r=1/d, C=c.
-    Returns (status, sent, noncomp, skipped, n_sched).
+    Returns (status, sent, noncomp, skipped, n_sched, abort_reason).
     sent = requests that passed the concurrency gate (engaged the server)."""
     r = 1.0 / d
     sched = [(row["arrival_offset_s"] / c, row) for row in rows if row["keep_u"] < r]
@@ -415,10 +439,28 @@ async def replay(d, c, raw_f):
             if not ok:
                 noncomp += 1
 
+    abort_reason = []
+
     async def watchdog():
         while not abort.is_set():
             await asyncio.sleep(2.5)
+            # tier 1 (frozen rule): >5% of the full schedule measurably failed
             if sent > 0 and noncomp > 0.05 * n_sched:
+                abort_reason.append("tier1: noncompliant > 5% of scheduled")
+                abort.set()
+            # tier 2 (early-stop heuristic): the full offer window has
+            # elapsed and >5% of ENGAGED requests have failed. Under the
+            # monotonicity assumption declared in Amendment-01, the config
+            # cannot recover to 95% compliance; tier-2 can only make a
+            # hopeless config fail FASTER, never change which config passes.
+            # This is a replay-client implementation detail that does not
+            # affect offered load, inside the exploration space of Protocol
+            # Lock v2.1 section 2 item 2 — no protocol amendment required.
+            elif (time.monotonic() - t0 > 3600 / c and sent >= 200
+                  and noncomp > 0.05 * sent):
+                abort_reason.append(
+                    "tier2: window elapsed, noncompliant > 5% of engaged "
+                    "(Protocol Lock v2.1 sec.2 item 2)")
                 abort.set()
 
     async def sender():
@@ -434,24 +476,32 @@ async def replay(d, c, raw_f):
         while not abort.is_set() and done < n_sched:
             await asyncio.sleep(30)
             print(f"  [r=1/{d} C={c}] t={time.monotonic()-t0:.0f}s sent={sent} "
-                  f"done={done} noncompliant={noncomp}", flush=True)
+                  f"done={done} noncompliant={noncomp} "
+                  f"({noncomp / max(sent, 1) * 100:.1f}% of engaged)", flush=True)
 
     wd = asyncio.create_task(watchdog())
     pg = asyncio.create_task(progress())
     sd = asyncio.create_task(sender())
     await sd
-    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()
-             and t not in (wd, pg, sd)]
-    if abort.is_set():
-        for t in tasks:
-            t.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        wd.cancel(); pg.cancel()
-        return "ABORTED-FAIL", sent, noncomp, skipped, n_sched
-    await asyncio.gather(*tasks, return_exceptions=True)
+    # Drain WITH abort watch: tier-2 fires only at/after window end — i.e. at
+    # exactly the moment the sender finishes — so a one-shot abort check here
+    # would miss it (learned the hard way, 2026-10-07: abort was set but the
+    # client walked into the non-abort gather and drained at server speed).
+    # Re-check the flag every second during the drain and cancel on sight.
+    pending = {t for t in asyncio.all_tasks()
+               if t is not asyncio.current_task() and t not in (wd, pg, sd)}
+    while pending:
+        if abort.is_set():
+            for t in pending:
+                t.cancel()
+        _, pending = await asyncio.wait(
+            pending, timeout=1.0, return_when=asyncio.FIRST_COMPLETED)
     wd.cancel(); pg.cancel()
+    if abort.is_set():
+        return ("ABORTED-FAIL", sent, noncomp, skipped, n_sched,
+                abort_reason[0] if abort_reason else "unknown")
     status = "PASS" if (1 - noncomp / max(sent - skipped, 1)) >= NEED else "FAIL"
-    return status, sent, noncomp, skipped, n_sched
+    return status, sent, noncomp, skipped, n_sched, ""
 
 async def drain():
     for _ in range(60):
@@ -487,17 +537,21 @@ async def main():
             raw_path = os.path.join(RUN_DIR, f"calib_d{d}_c{c}.jsonl")
             with open(raw_path, "w") as raw_f:
                 raw_f.write(json.dumps({"watermark": WATERMARK, "D": d, "C": c}) + "\n")
-                status, sent, noncomp, skipped_n, n_sched = await replay(d, c, raw_f)
+                status, sent, noncomp, skipped_n, n_sched, reason = \
+                    await replay(d, c, raw_f)
             evaluated = sent - skipped_n
             comp = 1 - noncomp / max(evaluated, 1)
             marker = {"status": status, "scheduled": n_sched,
                       "sent": evaluated, "skipped_overlength": skipped_n,
                       "noncompliant": noncomp,
                       "compliance": round(comp, 6), "watermark": WATERMARK}
+            if reason:
+                marker["abort_reason"] = reason
             json.dump(marker, open(done_f, "w"), indent=2)
             attempted.append({"D": d, "C": c, **marker})
             print(f"[config r=1/{d} C={c}] → {status} "
-                  f"(compliance={comp:.4f}, sent={sent}, noncompliant={noncomp})", flush=True)
+                  f"(compliance={comp:.4f}, sent={sent}, noncompliant={noncomp})"
+                  + (f" [{reason}]" if reason else ""), flush=True)
             if status == "PASS":
                 chosen = {"D": d, "C": c}
                 break
