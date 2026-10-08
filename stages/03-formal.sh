@@ -339,7 +339,10 @@ say "operating point (frozen by stage 02): r=1/${D_CHOSEN}, C=${C_CHOSEN} → wi
 
 # ---------------- vLLM server lifecycle (per arm block) ----------------
 start_server() {   # $1 = arm (A|B)
-  local arm="$1" slog="$RUN_DIR/server_run${CUR_RUN}_arm${arm}.log"
+  local arm="$1"
+  # 2026-10-08 incident: a same-statement reference to ${arm} trips `set -u`
+  # (bash expands all RHS words of one `local` before binding any). Split lines.
+  local slog="$RUN_DIR/server_run${CUR_RUN}_arm${arm}.log"
   local extra=""
   [ "$arm" = "B" ] && extra="--quantization fp8"
   say "run ${CUR_RUN}: starting Arm ${arm} server ($([ "$arm" = B ] && echo 'FP8 dynamic' || echo 'BF16 defaults'); prefix caching OFF; max_model_len=$MAX_MODEL_LEN)"
