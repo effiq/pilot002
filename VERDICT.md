@@ -115,6 +115,9 @@ it shows.
   - stage-05 first pod died at engine init (host NVIDIA driver too old for the pinned
     torch cu130 build); zero data produced; pod swapped, driver check added to the
     human runbook; script unchanged.
+  - stage-06 first run hit a reasoning-mode judge returning null content (probe gap);
+    stopped with zero rows written, patched and re-anchored under
+    PREREG-ADDENDUM-01-AMENDMENT-01 at the zero-data point.
 - All verdicts are byte-reproducible from the public archive alone (see REPRODUCE.md).
 
 ## 7. Related work
@@ -151,7 +154,7 @@ operating points.
 |---|---|
 | stage-04 verdict script | `71a4930f…f87c1d` |
 | stage-05 quality-gate script | `ab8c4c58…c8a9a5` |
-| stage-06 judge-robustness script (addendum) | `a302d766…7809e8` |
+| stage-06 judge-robustness script (addendum, as amended — see PREREG-ADDENDUM-01-AMENDMENT-01) | `2a21fecd…4a8bb2` |
 | frozen_set.jsonl | `728b2f83…5cf7d` |
 | stage-05 gen_A / gen_B | `16df35cc…` / `8e79384a…` |
 | stage-05 blind_map / judge_raw | `684aea8d…` / `2404eca1…` |
