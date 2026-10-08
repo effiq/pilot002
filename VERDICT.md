@@ -94,10 +94,15 @@ shapes how a reader should weigh §3:
    pilots (−0.200 / −0.280), while doc_qa and code_completion flipped sign across
    pilots (Pilot 001: −0.440 / +0.800).
 
-A pre-registered follow-up (`PREREG-ADDENDUM-01-judge-robustness.md`) re-judges the
-same archived outputs with an independent judge panel to classify the breach as
-judge-robust or judge-fragile. Its outcome will be published as an addendum whatever
-it shows.
+A pre-registered follow-up (`PREREG-ADDENDUM-01-judge-robustness.md`, amended by
+`PREREG-ADDENDUM-01-AMENDMENT-01.md`) re-judged the same archived outputs with a
+judge panel (`deepseek-v3.1-terminus` + `deepseek-chat-v3.1`; `glm-4.6` was
+eliminated by the hardened probe per the amendment). **Outcome (2026-10-08):
+ROBUST-CLEAR** — both panel judges scored the FP8 arm *higher* on every axis
+(clarity deltas +0.127 / +0.193), so the sealed breach is classified as
+judge-fragile. Caveat in force: the panel is all-DeepSeek-family (declared in the
+pre-registration). Full record: `pilot-logs` `2026-10-08/06-judge-robustness/run_1/`,
+reproducible via `stages/06-judge-robustness.sh --verify`.
 
 ## 6. Governance chain and incidents
 
