@@ -347,8 +347,13 @@ if not KEY.startswith("sk-or-") and "openrouter.ai" in ORBASE:
     raise SystemExit(1)
 
 def call_api(model, messages, max_tokens, timeout=120):
+    # 2026-10-08 Amendment-01: reasoning-mode judges (e.g. glm-4.6) may burn the
+    # entire token budget on internal reasoning and return null content.
+    # reasoning.exclude asks the provider for direct output; harmless for
+    # non-reasoning models. Declared in PREREG-ADDENDUM-01-AMENDMENT-01.
     body = json.dumps(dict(model=model, messages=messages, temperature=0,
-                           max_tokens=max_tokens)).encode()
+                           max_tokens=max_tokens,
+                           reasoning={"exclude": True})).encode()
     req = urllib.request.Request(
         f"{ORBASE}/chat/completions", data=body,
         headers={"Authorization": f"Bearer {KEY}",
@@ -364,7 +369,11 @@ for cand, cin, cout in CANDIDATES:
     if len(panel) >= PSIZE: break
     try:
         resp = call_api(cand, [dict(role="user", content="Reply with the single word: ok")], max_tokens=4, timeout=60)
-        _ = resp["choices"][0]["message"]["content"]
+        _txt = resp["choices"][0]["message"]["content"]
+        # Amendment-01: a candidate whose content comes back empty is NOT
+        # "reachable" for judging purposes (probe must require real content).
+        if not _txt or not str(_txt).strip():
+            raise ValueError("empty probe content")
         panel.append(cand); prices[cand] = (cin, cout)
         print(f"panel judge {len(panel)}/{PSIZE}: {cand} (probe ok)")
     except Exception as e:
@@ -454,8 +463,13 @@ with open(JRAW, "a") as fj:
             ok = False
             for attempt, pause in enumerate((5, 15, 30)):
                 try:
-                    resp = call_api(jm, msgs, max_tokens=300)
+                    # Amendment-01: max_tokens 300 -> 1024 (headroom for judges
+                    # that wrap content in extra structure despite exclude).
+                    resp = call_api(jm, msgs, max_tokens=1024)
                     content = resp["choices"][0]["message"]["content"]
+                    if content is None:
+                        # log truncated raw response as archived evidence
+                        raise ValueError("null content; raw=" + json.dumps(resp)[:200])
                     scores = parse_scores(content)
                     u = resp.get("usage", {})
                     row = dict(request_id=rid, judge_model=jm,
