@@ -86,12 +86,32 @@ if [ "${1:-}" = "--verify" ]; then
   SELF="$(readlink -f "$0")"
   TMPD="$(mktemp -d)"
   STAGE04_OUT_DIR="$TMPD" STAGE04_FORCE_VERIFY_ONLY=1 bash "$SELF" > /dev/null
-  cmp -s "$TMPD/verdict_p.txt" "$VD/verdict_p.txt" \
-    || die "VERIFY: verdict_p.txt MISMATCH — investigate before trusting the archive"
-  say "VERIFY: verdict_p.txt byte-identical"
-  cmp -s "$TMPD/verdict_p.json" "$VD/verdict_p.json" \
-    || die "VERIFY: verdict_p.json MISMATCH"
-  say "VERIFY: verdict_p.json byte-identical"
+  # Every NUMBER is compared byte-exactly. Two provenance fields are
+  # machine-local by nature and are normalized before comparison (declared):
+  #   - the absolute archive path in "computed from raw archives: ..."
+  #   - scripts_rev (resolves only where a pilot002 git checkout exists)
+  SRC_DIR="$SRC_DIR" LOGS_DIR="$LOGS_DIR" VD="$VD" TMPD="$TMPD" python3 - <<'PY'
+import json, os, re, sys
+VD, TMPD = os.environ["VD"], os.environ["TMPD"]
+rel = os.path.relpath(os.environ["SRC_DIR"], os.environ["LOGS_DIR"])
+def norm_txt(p):
+    t = open(p).read()
+    t = re.sub(r"computed from raw archives: \S+", f"computed from raw archives: {rel}", t)
+    t = re.sub(r"scripts_rev=\S+", "scripts_rev=NORMALIZED", t)
+    return t
+a, b = norm_txt(os.path.join(VD, "verdict_p.txt")), norm_txt(os.path.join(TMPD, "verdict_p.txt"))
+if a != b:
+    sys.exit("VERIFY: verdict_p.txt MISMATCH (after declared provenance normalization)")
+ja = json.load(open(os.path.join(VD, "verdict_p.json")))
+jb = json.load(open(os.path.join(TMPD, "verdict_p.json")))
+for j in (ja, jb):
+    j.pop("scripts_rev", None); j.pop("source_archive", None)
+if ja != jb:
+    diff = {k for k in set(ja) | set(jb) if ja.get(k) != jb.get(k)}
+    sys.exit(f"VERIFY: verdict_p.json MISMATCH in fields: {sorted(diff)}")
+print("VERIFY: verdict_p.txt identical (numbers byte-exact; machine-local provenance normalized)")
+print("VERIFY: verdict_p.json identical (all numeric/verdict fields equal)")
+PY
   say "VERIFY: ALL CHECKS PASSED"
   rm -rf "$TMPD"
   exit 0
