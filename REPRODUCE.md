@@ -1,5 +1,8 @@
 # Pilot 002 — Reproduction Guide
 
+> **Custody note (2026-10-24):** the raw-evidence repository `effiq/pilot-logs` is private custody as of this date; the archive remains intact under sha256 custody and is available on request for audit. References below to cloning `pilot-logs` describe the public-archive period and are kept unchanged for the record.
+
+
 Every verdict number in VERDICT.md is recomputed from the public log archive alone —
 no GPU, no network services, no API keys. If you find a mismatch, that is a
 reportable event; please open an issue.
