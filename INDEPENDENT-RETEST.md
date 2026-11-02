@@ -20,8 +20,12 @@ result we were hoping would pass.
 
 ## Track 1 — audit / recompute (no GPU)
 
-Requirements: `bash`, `python3` ≥ 3.10 with `numpy`. No network beyond the
-initial clone.
+Requirements: Linux or macOS, `bash`, `python3` ≥ 3.10 with `numpy`. Nothing
+else. No network beyond the initial clone. On Debian/Ubuntu (incl. WSL):
+`sudo apt install -y python3-numpy`; elsewhere: `pip3 install numpy`.
+
+If `~/effiq/pilot002` already exists from an older clone, move it aside first:
+`mv ~/effiq/pilot002 ~/effiq/pilot002-old` (and `rm -f ~/effiq/pilot-logs`).
 
 ```bash
 mkdir -p ~/effiq && cd ~/effiq
