@@ -1,0 +1,16 @@
+{
+  "arm": "B",
+  "status": "ok",
+  "rows": 1209,
+  "ok": 1209,
+  "errors": 0,
+  "mean_tps": 17.540712,
+  "mean_ttft_s": 0.429451,
+  "mean_tpot_ms": 48.657988,
+  "mean_e2e_s": 3.952765,
+  "completion_tokens_total": 100992,
+  "scheduled": 1209,
+  "window_s": 900.0,
+  "raw_sha256": "36c78748f51c2795ad284e3f1f5420225d2be3bac3330103c27646fcbe4e255b",
+  "raw_file": "armB.jsonl"
+}

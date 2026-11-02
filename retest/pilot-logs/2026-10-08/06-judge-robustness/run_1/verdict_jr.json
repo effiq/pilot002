@@ -1,0 +1,41 @@
+{
+  "outcome": "ROBUST-CLEAR",
+  "panel": [
+    "deepseek/deepseek-v3.1-terminus",
+    "deepseek/deepseek-chat-v3.1"
+  ],
+  "per_judge": {
+    "deepseek/deepseek-chat-v3.1": {
+      "axis_delta": {
+        "clarity": 0.19333333333333336,
+        "correctness": 0.24666666666666703,
+        "instruction_following": 0.21333333333333293
+      },
+      "clarity_breach": false,
+      "clarity_ci": [
+        -0.13333333333333333,
+        0.52
+      ],
+      "gate_ok": true,
+      "overall": 0.21777777777777776
+    },
+    "deepseek/deepseek-v3.1-terminus": {
+      "axis_delta": {
+        "clarity": 0.12666666666666693,
+        "correctness": 0.21333333333333293,
+        "instruction_following": 0.1999999999999993
+      },
+      "clarity_breach": false,
+      "clarity_ci": [
+        -0.21333333333333335,
+        0.47333333333333333
+      ],
+      "gate_ok": true,
+      "overall": 0.18
+    }
+  },
+  "pilot": "002-addendum-01",
+  "scripts_rev": "42ff1a2a9ebc3b4d8a81046a55a9772324f17803",
+  "source_archive": "/root/effiq/pilot-logs/2026-10-08/05-quality-gate/run_1",
+  "stage": "06-judge-robustness"
+}

@@ -1,0 +1,6 @@
+
+[1;36m[stage02] resuming incomplete run dir: /root/effiq/pilot-logs/2026-10-06/02-calibration/run_1[0m
+
+[1;36m[stage02] preflight asserts[0m
+
+[1;31m[stage02][ERROR] disk headroom < 45GB (weights ≈ 28GB)[0m

@@ -1,0 +1,68 @@
+[stage06] resuming incomplete run: /root/effiq/pilot-logs/2026-10-08/06-judge-robustness/run_1
+stage-05 source archive anchors verified (frozen_set/gen_A/gen_B/blind_map)
+[stage06] stage-05 source: /root/effiq/pilot-logs/2026-10-08/05-quality-gate/run_1
+[stage06] blind judging with frozen panel (budget guard $5, time guard 7200s)
+panel candidate z-ai/glm-4.6: unavailable (ValueError: empty probe content)
+panel judge 1/2: deepseek/deepseek-v3.1-terminus (probe ok)
+panel judge 2/2: deepseek/deepseek-chat-v3.1 (probe ok)
+judge resume: 0 rows already judged, est. spent so far $0.000 (budget guard $5)
+  judged fz-000 by deepseek/deepseek-v3.1-terminus (1/300), est. spent $0.001
+  judged fz-019 by deepseek/deepseek-v3.1-terminus (20/300), est. spent $0.032
+  judged fz-039 by deepseek/deepseek-v3.1-terminus (40/300), est. spent $0.096
+  judged fz-059 by deepseek/deepseek-v3.1-terminus (60/300), est. spent $0.157
+  judged fz-079 by deepseek/deepseek-v3.1-terminus (80/300), est. spent $0.201
+  judged fz-099 by deepseek/deepseek-v3.1-terminus (100/300), est. spent $0.289
+  judged fz-119 by deepseek/deepseek-v3.1-terminus (120/300), est. spent $0.321
+  judged fz-139 by deepseek/deepseek-v3.1-terminus (140/300), est. spent $0.384
+  judged fz-009 by deepseek/deepseek-chat-v3.1 (160/300), est. spent $0.443
+  judged fz-029 by deepseek/deepseek-chat-v3.1 (180/300), est. spent $0.483
+  judged fz-049 by deepseek/deepseek-chat-v3.1 (200/300), est. spent $0.561
+  judged fz-069 by deepseek/deepseek-chat-v3.1 (220/300), est. spent $0.592
+  judged fz-089 by deepseek/deepseek-chat-v3.1 (240/300), est. spent $0.652
+  judged fz-109 by deepseek/deepseek-chat-v3.1 (260/300), est. spent $0.710
+  judged fz-129 by deepseek/deepseek-chat-v3.1 (280/300), est. spent $0.749
+  judged fz-149 by deepseek/deepseek-chat-v3.1 (300/300), est. spent $0.827
+judge phase done: new=300 failed=0 total_judged=300/300 est_spent=$0.827
+[stage06] verdict (recomputed from archived logs)
+STAGE 06 VERDICT — JUDGE-ROBUSTNESS PROBE (PILOT 002 ADDENDUM-01)
+status: post-verdict addendum; does NOT modify the sealed stage-05 verdict (verdict_q.txt)
+question: does the stage-05 clarity breach replicate across an independent judge panel
+          scoring the SAME archived outputs? (tolerance=0.1, same as stage 05)
+blind map reused from the stage-05 archive; identical presentation order for every judge
+source archive: /root/effiq/pilot-logs/2026-10-08/05-quality-gate/run_1
+  frozen_set.jsonl: sha256=728b2f8354701a301467afaf52d643d12a679af5c41542bb1701634e4235cf7d
+  gen_A.jsonl: sha256=16df35ccad32cc60a5785ce87fa96e325487b66ec3000e3fa04e6479b886c8cd
+  gen_B.jsonl: sha256=8e79384a6c3a621d532dec4304da0c5a3fed960a256c606794e6135a0d9ba57c
+  blind_map.jsonl: sha256=684aea8dcc33ce4f88d9aa8644007cdb8ace0e4ff331a124b8c62fe1c7e76392
+  judge_raw_jr.jsonl: sha256=5ec1d3f1875ccfd337008b412dff72a35b2c9187bee74d211a1e8e26a449b4ef
+scripts_rev=42ff1a2a9ebc3b4d8a81046a55a9772324f17803
+
+original judge (stage 05, sealed): deepseek/deepseek-chat-v3-0324  clarity delta -0.127 (breach)
+
+panel judges (2/2): deepseek/deepseek-v3.1-terminus, deepseek/deepseek-chat-v3.1
+judged rows: 300 / 300
+
+[judge: deepseek/deepseek-v3.1-terminus]
+  correctness           : A(bf16)=5.093  B(fp8)=5.307  delta=+0.213
+  instruction_following : A(bf16)=4.473  B(fp8)=4.673  delta=+0.200
+  clarity               : A(bf16)=5.220  B(fp8)=5.347  delta=+0.127
+  overall pooled delta (B - A): +0.180  ->  stage-05 criterion would give: PASS
+  clarity axis: within tolerance (delta +0.127 vs -0.1)
+  [descriptive] 95% bootstrap CI of clarity delta: [-0.213, +0.473] (seed=20261012, resamples=100000)
+
+[judge: deepseek/deepseek-chat-v3.1]
+  correctness           : A(bf16)=4.953  B(fp8)=5.200  delta=+0.247
+  instruction_following : A(bf16)=4.327  B(fp8)=4.540  delta=+0.213
+  clarity               : A(bf16)=5.267  B(fp8)=5.460  delta=+0.193
+  overall pooled delta (B - A): +0.218  ->  stage-05 criterion would give: PASS
+  clarity axis: within tolerance (delta +0.193 vs -0.1)
+  [descriptive] 95% bootstrap CI of clarity delta: [-0.133, +0.520] (seed=20261012, resamples=100000)
+
+panel rule: ROBUST-FAIL if all panel judges breach clarity; ROBUST-CLEAR if none do; else MIXED
+
+PANEL OUTCOME: ROBUST-CLEAR — no panel judge replicates the clarity breach — the FAIL is judge-fragile (consistent with single-judge noise)
+
+reminder: this addendum does not modify the sealed stage-05 verdict (FAIL).
+
+This file is reproducible from the archived logs alone: bash stages/06-judge-robustness.sh --verify <run_dir>
+STAGE 06 JUDGE-ROBUSTNESS PROBE: COMPLETE (rows=300/300; see verdict_jr.txt)

@@ -1,0 +1,40 @@
+{
+  "run_idx": 2,
+  "pair_id": "pair_2",
+  "run_seed": 20263002,
+  "arm_order": [
+    "B",
+    "A"
+  ],
+  "D": 256,
+  "C": 4,
+  "window_s": 900.0,
+  "fallback": true,
+  "disclosure": "no grid configuration met the SLO; lightest configuration used, shortfall disclosed per protocol",
+  "scripts_rev": "913e8e66",
+  "note": "descriptive means only; paired-bootstrap CI (seed 20262002) and the P95 non-inferiority gate are computed exclusively by the stage-04 verdict script",
+  "per_arm": {
+    "A": {
+      "rows": 794,
+      "ok": 794,
+      "errors": 0,
+      "skipped_overlength": 0,
+      "mean_tps": 12.105067,
+      "mean_ttft_s": 0.649835,
+      "mean_tpot_ms": 69.433991,
+      "mean_e2e_s": 6.806756
+    },
+    "B": {
+      "rows": 794,
+      "ok": 794,
+      "errors": 0,
+      "skipped_overlength": 0,
+      "mean_tps": 20.068677,
+      "mean_ttft_s": 0.41942,
+      "mean_tpot_ms": 39.672348,
+      "mean_e2e_s": 4.062593
+    }
+  },
+  "paired_ok_requests": 794,
+  "paired_mean_ratio_B_over_A": 1.694029
+}

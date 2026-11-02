@@ -1,0 +1,36 @@
+
+[1;36m[stage01] --rebuild: ignoring COMPLETE guard; rebuilding pod-local artifacts into a new run dir[0m
+
+[1;36m[stage01] run dir: /root/effiq/pilot-logs/2026-10-08/01-trace-pipeline/run_2[0m
+
+[1;36m[stage01] conv sha256: a0cc9b969a9bbf0f… (1135195393 bytes)[0m
+
+[1;36m[stage01] code sha256: 71de5c55cbc35f8f… (691989454 bytes)[0m
+
+[1;36m[stage01] analyzing traces, selecting slices, building plans[0m
+[conv] rows=27,303,999 span=2024-05-12T00:00:00.001163+00:00 → 2024-05-18T23:59:59.995460+00:00 bad_rows=0
+[code] rows=16,803,695 span=2024-05-10T00:00:00.009930+00:00 → 2024-05-16T23:59:59.929501+00:00 bad_rows=0
+[pair_1] window=2024-05-12T05:00:00+00:00 conv=77,571 code=30,551 merged_sha=0c0fcf14b33ce205…
+[pair_2] window=2024-05-13T05:00:00+00:00 conv=160,461 code=40,353 merged_sha=831d4a8ba47744c5…
+[pair_3] window=2024-05-13T20:00:00+00:00 conv=193,553 code=267,866 merged_sha=f3ab804060981c3e…
+[pair_4] window=2024-05-15T12:00:00+00:00 conv=219,399 code=91,301 merged_sha=8e9753f620d38876…
+[pair_5] window=2024-05-15T21:00:00+00:00 conv=130,303 code=210,675 merged_sha=5784d2d126a7ebc3…
+[pair_6] window=2024-05-16T06:00:00+00:00 conv=197,480 code=41,180 merged_sha=4d2cdcae86b8e621…
+[calibration] window=2024-05-16T10:00:00+00:00 conv=171,054 code=31,950 merged_sha=d9f94896776893e6…
+
+=== stage 01 summary ===
+formal pairs 1..6 + calibration pair selected (seed 20261010)
+  pair_1       2024-05-12T05:00:00+00:00  conv=77,571  code=30,551
+  pair_2       2024-05-13T05:00:00+00:00  conv=160,461  code=40,353
+  pair_3       2024-05-13T20:00:00+00:00  conv=193,553  code=267,866
+  pair_4       2024-05-15T12:00:00+00:00  conv=219,399  code=91,301
+  pair_5       2024-05-15T21:00:00+00:00  conv=130,303  code=210,675
+  pair_6       2024-05-16T06:00:00+00:00  conv=197,480  code=41,180
+  calibration  2024-05-16T10:00:00+00:00  conv=171,054  code=31,950
+anchors written to run dir; plans (bulk) under plans dir — reproducible, not pushed
+
+[1;36m[stage01] ✅ stage 01 COMPLETE[0m
+  anchors: /root/effiq/pilot-logs/2026-10-08/01-trace-pipeline/run_2
+  plans:   /root/effiq/trace/plans (pod-local bulk; hash-anchored, reproducible)
+  verify:  bash stages/01-trace-pipeline.sh --verify
+  next:    switch the STAGE file to 02-calibration (not yet shipped)

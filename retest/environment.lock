@@ -1,0 +1,12 @@
+# Pilot 002 — environment anchor (published scope of VERDICT.md)
+gpu: NVIDIA L40S 48GB (single)
+engine: vLLM 0.31.0 (pinned)
+model: Qwen/Qwen2.5-14B-Instruct
+model_revision: cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8
+max_model_len: 32768
+arm_A: BF16 defaults, prefix caching off
+arm_B: FP8 dynamic quantization (vLLM built-in), identical serving config
+workload: Azure LLM Inference Trace 2024 (conv + code, CC-BY), 6 hour-aligned window pairs + 1 calibration pair, seed 20261010; pre-registered thinning/compression per Protocol-Lock v2.1 Amendment-01
+operating_point: calibration-derived; fallback point used and disclosed per protocol
+statistics: paired bootstrap, seed 20262002, 100000 resamples
+note: hardware-bound measurement — claims hold for this environment; re-measurement on other hardware is a new measurement under the same protocol

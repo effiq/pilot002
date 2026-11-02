@@ -1,0 +1,17 @@
+{
+  "stage": "01-trace-pipeline",
+  "status": "COMPLETE",
+  "trace_seed": 20261010,
+  "conv_sha256": "a0cc9b969a9bbf0fd811802cbf4323edd3a209ace791e3799ad4f9207f213941",
+  "code_sha256": "71de5c55cbc35f8f1ed0b6b7806b4cd1e9764b0058469725a6aac98023a1448f",
+  "formal_pairs": [
+    "pair_1",
+    "pair_2",
+    "pair_3",
+    "pair_4",
+    "pair_5",
+    "pair_6"
+  ],
+  "calibration_pair": "calibration",
+  "plans_dir": "/root/effiq/trace/plans"
+}

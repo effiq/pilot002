@@ -1,0 +1,10 @@
+{
+  "status": "ABORTED-FAIL",
+  "scheduled": 3180,
+  "sent": 326,
+  "skipped_overlength": 0,
+  "noncompliant": 318,
+  "compliance": 0.02454,
+  "watermark": "CALIBRATION DATA ONLY \u2014 never enters the CI",
+  "abort_reason": "tier1: noncompliant > 5% of scheduled"
+}

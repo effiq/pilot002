@@ -1,0 +1,42 @@
+
+[1;36m[stage04] computing the sealed verdict from /root/effiq/pilot-logs/2026-10-08/03-formal/run_1 (scripts_rev=3fdae83c6c8efc09af078ecc9cf2a630967fbced)[0m
+STAGE 04 VERDICT — PILOT 002 PERFORMANCE HALF (L4)
+computed from raw archives: /root/effiq/pilot-logs/2026-10-08/03-formal/run_1
+scripts_rev=3fdae83c6c8efc09af078ecc9cf2a630967fbced  bootstrap seed=20262002  resamples=100000  threshold=1.2x
+disclosure: no grid configuration met the SLO; lightest configuration used, shortfall disclosed per protocol (operating point r=1/256, C=4)
+
+[input integrity] per-block raw JSONL sha256 vs stage-03 markers:
+  run 1 arm A: OK (66e7ce0b73f98692…)
+  run 1 arm B: OK (107485d7f9d15228…)
+  run 2 arm A: OK (f16983576cba9f10…)
+  run 2 arm B: OK (f96fe8650032d6e5…)
+  run 3 arm A: OK (a4ecbaa786db447a…)
+  run 3 arm B: OK (d98fc5f9a8d6ad95…)
+  run 4 arm A: OK (34d4c6a2e0010d96…)
+  run 4 arm B: OK (36c78748f51c2795…)
+  run 5 arm A: OK (11caaf1a25020011…)
+  run 5 arm B: OK (1dcd92db219333f3…)
+  run 6 arm A: OK (92358ec5c7d27603…)
+  run 6 arm B: OK (9c67aa9c3e5fec2a…)
+
+[runs] n=6 formal runs; paired requests per run: [459, 794, 1754, 1209, 1390, 946]
+
+[primary] per-request throughput = output tokens / end-to-end latency (queue included)
+  run-level mean log-ratios (B/A): run 1: +0.4541, run 2: +0.5057, run 3: +2.2380, run 4: +0.5967, run 5: +0.7240, run 6: +0.5511
+  point estimate: exp(mean) = 2.3279x
+  paired bootstrap 95% CI (over runs): exp([+0.5123, +1.4158]) = [1.6691, 4.1199]x
+  rule: PASS iff CI lower bound >= 1.2x  ->  primary = PASS
+
+[secondary] pooled tail-latency non-inferiority (tolerance 5%)
+  P95 TPOT: A=382.87ms B=262.12ms ratio=0.6846  OK
+  P95 TTFT: A=37.272s B=1.861s ratio=0.0499  OK
+
+VERDICT (performance half): PASS
+
+Reproduce: bash stages/04-verdict.sh --verify
+
+
+[1;36m[stage04] stage 04 COMPLETE — performance-half verdict: PASS[0m
+  verdict: /root/effiq/pilot-logs/2026-10-08/04-verdict/run_1/verdict_p.txt
+  verify:  bash stages/04-verdict.sh --verify
+  next:    switch the STAGE file to 05-quality-gate

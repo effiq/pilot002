@@ -1,0 +1,10 @@
+{
+  "status": "ABORTED-FAIL",
+  "scheduled": 203004,
+  "sent": 2861,
+  "skipped_overlength": 0,
+  "noncompliant": 2860,
+  "compliance": 0.00035,
+  "watermark": "CALIBRATION DATA ONLY \u2014 never enters the CI",
+  "abort_reason": "tier2: window elapsed, noncompliant > 5% of engaged (Protocol Lock v2.1 sec.2 item 2)"
+}

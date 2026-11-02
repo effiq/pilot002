@@ -1,0 +1,107 @@
+{
+  "pair_1": {
+    "window_hour": 476525,
+    "conv": {
+      "sha256": "cc22b07a8ad54649916ed8f3a927cc8d41d3144da32af6f14f75a47601af9246",
+      "rows": 77571
+    },
+    "code": {
+      "sha256": "3f1d1a3ca34cc13e2d310840967d7792223c7041d99e4e04222dd56f15a5bf11",
+      "rows": 30551
+    },
+    "merged_sha256": "0c0fcf14b33ce205f4d74d232bf682151c4ba4bf7aa12d8c1c99347f4c64b0c2",
+    "merged_rows": 108122,
+    "plan_file": "/root/effiq/trace/plans/pair_1.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  },
+  "pair_2": {
+    "window_hour": 476549,
+    "conv": {
+      "sha256": "13dcb9ff376c59d4b9aeff1f7f319df58406655a75b65a3ae882ed3c4e37c52d",
+      "rows": 160461
+    },
+    "code": {
+      "sha256": "0c4cf36ff27ba8c1f33a08eb06e4b365576b3f15957138b13c6862106f0c5ea7",
+      "rows": 40353
+    },
+    "merged_sha256": "831d4a8ba47744c5b2f395e876a82770d264be675c8b5ff3d55a8f769e2957c3",
+    "merged_rows": 200814,
+    "plan_file": "/root/effiq/trace/plans/pair_2.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  },
+  "pair_3": {
+    "window_hour": 476564,
+    "conv": {
+      "sha256": "b348704dad81a0ed1ea2dbc4fdf37d8d8a45b6ff3de797d8ee6ccaec935c6f81",
+      "rows": 193553
+    },
+    "code": {
+      "sha256": "06a9ec9f4f3ecd85670597c2584ae05886fd5014d790f6c498019df940790ecc",
+      "rows": 267866
+    },
+    "merged_sha256": "f3ab804060981c3e3b63609867ec0e85fe914428fd249e5fb58274c7bb3a8b75",
+    "merged_rows": 461419,
+    "plan_file": "/root/effiq/trace/plans/pair_3.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  },
+  "pair_4": {
+    "window_hour": 476604,
+    "conv": {
+      "sha256": "82ee8e0e620cdc7f3775f5850c0e6ffa92672680ec28325242b2a69a51c275fc",
+      "rows": 219399
+    },
+    "code": {
+      "sha256": "c92a549f1279dcccde912970cc9578cdcd767cbc59bb53d88a3a1b4a95e1fc8e",
+      "rows": 91301
+    },
+    "merged_sha256": "8e9753f620d3887624dd8592defab4cba2ec3a7ccbbf5149601b223b3081950e",
+    "merged_rows": 310700,
+    "plan_file": "/root/effiq/trace/plans/pair_4.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  },
+  "pair_5": {
+    "window_hour": 476613,
+    "conv": {
+      "sha256": "c97eb75caef232ed8dc50c49f0c663798c3b3921c50f4d55c826b8cc58f8f24c",
+      "rows": 130303
+    },
+    "code": {
+      "sha256": "c4a3e3ecb1e69115f7195ee29c7b1cefc4e8f457c3f66bb871b534b04ee40f5b",
+      "rows": 210675
+    },
+    "merged_sha256": "5784d2d126a7ebc322e3c963e800cbd03c86e61c0ca608424e5b41cd0de68429",
+    "merged_rows": 340978,
+    "plan_file": "/root/effiq/trace/plans/pair_5.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  },
+  "pair_6": {
+    "window_hour": 476622,
+    "conv": {
+      "sha256": "da1e8cba3c9ee5a76553bc5557d61a2f21876ce780a7d0eefb40b4635c843da3",
+      "rows": 197480
+    },
+    "code": {
+      "sha256": "3297ad761fa84de43e9feba38a3e12b9ddb2f35b16c4bc2a5e83cab762e152e3",
+      "rows": 41180
+    },
+    "merged_sha256": "4d2cdcae86b8e6213150bc52cd217e51a949d4e9c1f4c8258a3b5dce951ffbec",
+    "merged_rows": 238660,
+    "plan_file": "/root/effiq/trace/plans/pair_6.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  },
+  "calibration": {
+    "window_hour": 476626,
+    "conv": {
+      "sha256": "a213275f379ac41c823c735d99ecb66d088934e9edc3384dec1f3eff4193f1a5",
+      "rows": 171054
+    },
+    "code": {
+      "sha256": "f7744dbe76bc97c48000a7ae19f594f266bd064c5a8ecbaba145af5043d674ad",
+      "rows": 31950
+    },
+    "merged_sha256": "d9f94896776893e620875381d4acbdbffd8b9b773599b3515f356cde06ce7108",
+    "merged_rows": 203004,
+    "plan_file": "/root/effiq/trace/plans/calibration.jsonl",
+    "note": "full slice; apply thinning (keep_u < r) and compression (arrival_offset_s / C) at replay time per Protocol Lock v2.0 L2"
+  }
+}

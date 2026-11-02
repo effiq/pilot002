@@ -1,0 +1,31 @@
+{
+  "conv": {
+    "file": "AzureLLMInferenceTrace_conv_1week.csv",
+    "sha256": "a0cc9b969a9bbf0fd811802cbf4323edd3a209ace791e3799ad4f9207f213941",
+    "bytes": 1135195393,
+    "rows": 27303999,
+    "bad_rows": 0,
+    "first_ts": 1715472000.001163,
+    "last_ts": 1716076799.99546,
+    "first_iso": "2024-05-12T00:00:00.001163+00:00",
+    "last_iso": "2024-05-18T23:59:59.995460+00:00",
+    "context_tokens_total": 44548646118,
+    "generated_tokens_total": 2880822750,
+    "source_url": "default"
+  },
+  "code": {
+    "file": "AzureLLMInferenceTrace_code_1week.csv",
+    "sha256": "71de5c55cbc35f8f1ed0b6b7806b4cd1e9764b0058469725a6aac98023a1448f",
+    "bytes": 691989454,
+    "rows": 16803695,
+    "bad_rows": 0,
+    "first_ts": 1715299200.00993,
+    "last_ts": 1715903999.929501,
+    "first_iso": "2024-05-10T00:00:00.009930+00:00",
+    "last_iso": "2024-05-16T23:59:59.929501+00:00",
+    "context_tokens_total": 42198710773,
+    "generated_tokens_total": 381271302,
+    "source_url": "default"
+  },
+  "_note": "third-party artifact (Azure LLM Inference Trace 2024, CC-BY, DynamoLLM HPCA'25): hash-anchored, not frozen by us"
+}

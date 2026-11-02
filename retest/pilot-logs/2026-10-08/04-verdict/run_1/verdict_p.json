@@ -1,0 +1,71 @@
+{
+  "bootstrap": {
+    "over": "run-level mean log-ratios",
+    "resamples": 100000,
+    "seed": 20262002
+  },
+  "ci95_log": [
+    0.5122586886041649,
+    1.4158276175808167
+  ],
+  "ci95_ratio": [
+    1.6690568202771223,
+    4.11989475272817
+  ],
+  "disclosure": "no grid configuration met the SLO; lightest configuration used, shortfall disclosed per protocol",
+  "excluded_unpaired_rows": 0,
+  "fallback": true,
+  "input_sha256": {
+    "run1_armA": "66e7ce0b73f986925694f1805db57cbf020d431438dba78331134a45d77c85f9",
+    "run1_armB": "107485d7f9d15228f65bf2aa6590ce0a1ae368dc9dcbbab7de84a129fd00d473",
+    "run2_armA": "f16983576cba9f10d852722879d551c16b2773187d565e61c82f737eea5287db",
+    "run2_armB": "f96fe8650032d6e5f22191147a183516cd55cdbe95806ae12725026381943013",
+    "run3_armA": "a4ecbaa786db447a6e5b585b85cf446473278c6a4234077b1101a010ba612ff0",
+    "run3_armB": "d98fc5f9a8d6ad95f29994623424d149714fd905e978e6680ca1c8b266cd5920",
+    "run4_armA": "34d4c6a2e0010d965b3015e4d13c812ae517c15ddf6a72d1b1f7f50bb391c9e3",
+    "run4_armB": "36c78748f51c2795ad284e3f1f5420225d2be3bac3330103c27646fcbe4e255b",
+    "run5_armA": "11caaf1a2502001198bb2dddc7e5a7dfb48f71d4d531c483b512c81112dfaaa1",
+    "run5_armB": "1dcd92db219333f33372ee00336b7c81d32a8339111e307c45ce7daa22528f42",
+    "run6_armA": "92358ec5c7d27603bee763b21335c0c1607b0cfc96f029eb194358a86d8fc28e",
+    "run6_armB": "9c67aa9c3e5fec2a1b6dd64c3a27f91022360dda76712e0e2fd3cc76c6dd872e"
+  },
+  "n_runs": 6,
+  "pair_counts": [
+    459,
+    794,
+    1754,
+    1209,
+    1390,
+    946
+  ],
+  "pilot": "002",
+  "point_estimate_ratio": 2.327861607273138,
+  "primary": "PASS",
+  "run_mean_log_ratios": {
+    "1": 0.4541080341772458,
+    "2": 0.5057458788674447,
+    "3": 2.238045099906968,
+    "4": 0.5967169464789366,
+    "5": 0.723981296473846,
+    "6": 0.5511032304227049
+  },
+  "scripts_rev": "3fdae83c6c8efc09af078ecc9cf2a630967fbced",
+  "secondary": {
+    "ok": true,
+    "p95_tpot_ms": {
+      "A": 382.8701,
+      "B": 262.11834999999996
+    },
+    "p95_ttft_s": {
+      "A": 37.271525,
+      "B": 1.8608699999999998
+    },
+    "tolerance": 1.05,
+    "tpot_ratio": 0.6846143117469867,
+    "ttft_ratio": 0.049927390950598345
+  },
+  "source_archive": "/root/effiq/pilot-logs/2026-10-08/03-formal/run_1",
+  "stage": "04-verdict",
+  "threshold": 1.2,
+  "verdict": "PASS"
+}

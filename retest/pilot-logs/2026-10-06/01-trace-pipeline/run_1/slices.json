@@ -1,0 +1,87 @@
+{
+  "trace_seed": 20261010,
+  "seed_note": "frozen by Protocol Lock v2.0 L2",
+  "window_seconds": 3600,
+  "rule": "hour-aligned windows over the intersection of both services' spans; Random(20261010).sample(candidates, 20); first 7 windows with >= 100 requests in BOTH services selected; chronological order; first 6 = formal pairs, last = calibration pair (watermarked: CALIBRATION DATA ONLY \u2014 never enters the CI)",
+  "candidates_in_intersection": 120,
+  "draws": [
+    "2024-05-13T20:00:00+00:00",
+    "2024-05-13T05:00:00+00:00",
+    "2024-05-15T12:00:00+00:00",
+    "2024-05-16T06:00:00+00:00",
+    "2024-05-12T05:00:00+00:00",
+    "2024-05-15T21:00:00+00:00",
+    "2024-05-16T10:00:00+00:00",
+    "2024-05-13T08:00:00+00:00",
+    "2024-05-13T18:00:00+00:00",
+    "2024-05-14T03:00:00+00:00",
+    "2024-05-13T17:00:00+00:00",
+    "2024-05-13T21:00:00+00:00",
+    "2024-05-15T08:00:00+00:00",
+    "2024-05-12T22:00:00+00:00",
+    "2024-05-12T21:00:00+00:00",
+    "2024-05-14T02:00:00+00:00",
+    "2024-05-16T01:00:00+00:00",
+    "2024-05-14T10:00:00+00:00",
+    "2024-05-12T00:00:00+00:00",
+    "2024-05-16T04:00:00+00:00"
+  ],
+  "selected": [
+    {
+      "pair_id": "pair_1",
+      "role": "formal",
+      "window_hour": 476525,
+      "window_start_iso": "2024-05-12T05:00:00+00:00",
+      "conv_rows": 77571,
+      "code_rows": 30551
+    },
+    {
+      "pair_id": "pair_2",
+      "role": "formal",
+      "window_hour": 476549,
+      "window_start_iso": "2024-05-13T05:00:00+00:00",
+      "conv_rows": 160461,
+      "code_rows": 40353
+    },
+    {
+      "pair_id": "pair_3",
+      "role": "formal",
+      "window_hour": 476564,
+      "window_start_iso": "2024-05-13T20:00:00+00:00",
+      "conv_rows": 193553,
+      "code_rows": 267866
+    },
+    {
+      "pair_id": "pair_4",
+      "role": "formal",
+      "window_hour": 476604,
+      "window_start_iso": "2024-05-15T12:00:00+00:00",
+      "conv_rows": 219399,
+      "code_rows": 91301
+    },
+    {
+      "pair_id": "pair_5",
+      "role": "formal",
+      "window_hour": 476613,
+      "window_start_iso": "2024-05-15T21:00:00+00:00",
+      "conv_rows": 130303,
+      "code_rows": 210675
+    },
+    {
+      "pair_id": "pair_6",
+      "role": "formal",
+      "window_hour": 476622,
+      "window_start_iso": "2024-05-16T06:00:00+00:00",
+      "conv_rows": 197480,
+      "code_rows": 41180
+    },
+    {
+      "pair_id": "calibration",
+      "role": "calibration",
+      "window_hour": 476626,
+      "window_start_iso": "2024-05-16T10:00:00+00:00",
+      "conv_rows": 171054,
+      "code_rows": 31950
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+
+=== 0. run bookkeeping ===
+resuming incomplete run dir: /root/effiq/pilot-logs/2026-10-08/05-quality-gate/run_1
+
+=== 1. time / host / GPU / engine anchors (L1) ===
+Thu Oct  8 09:35:05 UTC 2026
+abae9b026f51
+scripts_rev=8403a600d32ede8a07986eb84080ef0f86136906
+vllm: 0.31.0 (pinned OK)
+gpu: NVIDIA L40S
+banner: L5 BLIND QUALITY GATE — Pilot 002 (serving mode, concurrency 8)
+
+=== 2. frozen evaluation set (reused by hash 728b2f8354701a301467afaf52d643d12a679af5c41542bb1701634e4235cf7d) ===
+frozen set already in run dir (sha256 verified)
+
+=== generation: arm A (BF16, serving mode, concurrency 8) ===
+starting arm A server (BF16 defaults; prefix caching OFF)
+arm A server healthy after 260s
+arm A: 0 already generated, 150 to go
+  arm A: 1/150 (last: fz-005, 243 tok, 17.8s)
+  arm A: 10/150 (last: fz-001, 792 tok, 50.7s)
+  arm A: 20/150 (last: fz-016, 716 tok, 53.0s)
+  arm A: 30/150 (last: fz-032, 469 tok, 34.0s)
+  arm A: 40/150 (last: fz-039, 555 tok, 90.9s)
+  arm A: 50/150 (last: fz-054, 273 tok, 29.6s)
+  arm A: 60/150 (last: fz-056, 543 tok, 36.9s)
+  arm A: 70/150 (last: fz-066, 596 tok, 46.5s)
+  arm A: 80/150 (last: fz-080, 524 tok, 41.3s)
+  arm A: 90/150 (last: fz-088, 744 tok, 98.0s)
+  arm A: 100/150 (last: fz-100, 395 tok, 82.1s)
+  arm A: 110/150 (last: fz-114, 272 tok, 15.8s)
+  arm A: 120/150 (last: fz-119, 550 tok, 41.3s)
+  arm A: 130/150 (last: fz-125, 758 tok, 76.6s)
+  arm A: 140/150 (last: fz-138, 502 tok, 86.3s)
+  arm A: 150/150 (last: fz-149, 760 tok, 91.7s)
+arm A generation phase done
+
+=== generation: arm B (FP8, serving mode, concurrency 8) ===
+starting arm B server (FP8 dynamic; prefix caching OFF)
+arm B server healthy after 90s
+arm B: 0 already generated, 150 to go
+  arm B: 1/150 (last: fz-005, 243 tok, 12.9s)
+  arm B: 10/150 (last: fz-001, 792 tok, 36.8s)
+  arm B: 20/150 (last: fz-019, 646 tok, 36.6s)
+  arm B: 30/150 (last: fz-030, 684 tok, 45.6s)
+  arm B: 40/150 (last: fz-043, 276 tok, 29.8s)
+  arm B: 50/150 (last: fz-053, 287 tok, 15.1s)
+  arm B: 60/150 (last: fz-056, 543 tok, 26.8s)
+  arm B: 70/150 (last: fz-070, 319 tok, 21.9s)
+  arm B: 80/150 (last: fz-079, 652 tok, 45.5s)
+  arm B: 90/150 (last: fz-089, 492 tok, 52.2s)
+  arm B: 100/150 (last: fz-098, 632 tok, 49.1s)
+  arm B: 110/150 (last: fz-111, 441 tok, 19.2s)
+  arm B: 120/150 (last: fz-120, 449 tok, 28.1s)
+  arm B: 130/150 (last: fz-125, 758 tok, 55.4s)
+  arm B: 140/150 (last: fz-138, 502 tok, 51.4s)
+  arm B: 150/150 (last: fz-149, 760 tok, 36.1s)
+arm B generation phase done
+
+=== 5. blind judging (judge sees no arm labels; blind seed 20261011) ===
+judge model selected: deepseek/deepseek-chat-v3-0324 (probe ok)
+blind map built (seed=20261011): 150 items
+judge resume: 0 already judged, est. spent so far $0.000 (budget guard $45)
+  judged fz-000 (1/150), est. spent $0.002
+  judged fz-009 (10/150), est. spent $0.016
+  judged fz-019 (20/150), est. spent $0.034
+  judged fz-029 (30/150), est. spent $0.062
+  judged fz-039 (40/150), est. spent $0.103
+  judged fz-049 (50/150), est. spent $0.153
+  judged fz-059 (60/150), est. spent $0.169
+  judged fz-069 (70/150), est. spent $0.188
+  judged fz-079 (80/150), est. spent $0.216
+  judged fz-089 (90/150), est. spent $0.258
+  judged fz-099 (100/150), est. spent $0.309
+  judged fz-109 (110/150), est. spent $0.325
+  judged fz-119 (120/150), est. spent $0.344
+  judged fz-129 (130/150), est. spent $0.371
+  judged fz-139 (140/150), est. spent $0.411
+  judged fz-149 (150/150), est. spent $0.461
+judge phase done: new=150 failed=0 total_judged=150/150 est_spent=$0.461
+
+=== 6. quality-gate verdict (recomputed from archived logs) ===
+STAGE 05 VERDICT — L5 BLIND QUALITY GATE (PILOT 002, serving-mode concurrency edition)
+tolerance=0.1 (10-pt scale; pre-registered: quality degradation > 0.1 -> FAIL)
+generation: serving mode, temperature=0, concurrency 8, natural stopping
+disclosure (L5): under continuous batching, floating-point reduction order makes
+outputs non-bit-deterministic; this gate compares judged text quality, never identity.
+blind seed=20261011; judge blinded to arm identity, judge model archived per row
+
+  frozen_set.jsonl: sha256=728b2f8354701a301467afaf52d643d12a679af5c41542bb1701634e4235cf7d
+  gen_A.jsonl: sha256=16df35ccad32cc60a5785ce87fa96e325487b66ec3000e3fa04e6479b886c8cd
+  gen_B.jsonl: sha256=8e79384a6c3a621d532dec4304da0c5a3fed960a256c606794e6135a0d9ba57c
+  judge_raw.jsonl: sha256=2404eca147936ce34641b955e89eb286d7cbf2917d005bfc37de2cd3c833366f
+  blind_map.jsonl: sha256=684aea8dcc33ce4f88d9aa8644007cdb8ace0e4ff331a124b8c62fe1c7e76392
+
+judged items: 150 / 150
+
+judge model(s) used: deepseek/deepseek-chat-v3-0324
+
+[per-axis results: mean over 150 items, 10-pt scale]
+  correctness           : A(bf16)=7.160  B(fp8)=7.173  delta=+0.013
+  instruction_following : A(bf16)=6.940  B(fp8)=6.947  delta=+0.007
+  clarity               : A(bf16)=6.733  B(fp8)=6.607  delta=-0.127
+
+[overall] pooled delta (B - A): -0.036
+
+criterion: overall delta >= -0.1 AND every axis delta >= -0.1  ->  FAIL
+
+[descriptive] textually identical outputs across arms: 0/150
+[descriptive] per-form pooled delta (B - A):
+  doc_qa          : +0.180 (n=50)
+  code_completion : -0.080 (n=50)
+  summarization   : -0.207 (n=50)
+
+[descriptive] 95% bootstrap CI of overall delta: [-0.329, +0.260] (seed=20261012, resamples=100000; the gate decision uses the point estimates above, per protocol)
+
+This file is reproducible from the archived logs alone: bash stages/05-quality-gate.sh --verify <run_dir>
+STAGE 05 QUALITY GATE: COMPLETE (genA=150 genB=150 judged=150; see verdict_q.txt)
+PILOT 002: both halves decided — see stage 04 verdict_p.txt and this stage's verdict_q.txt
